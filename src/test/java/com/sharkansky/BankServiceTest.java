@@ -3,10 +3,9 @@ package com.sharkansky;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Created by arkady69 on 4/11/16.
@@ -19,6 +18,9 @@ public class BankServiceTest {
         bankService = new BankService();
     }
 
+    /**
+     * Testing valid inputs, including a 0 withdrawl.
+     */
     @Test
     public void testWithdrawValidInput() throws Exception {
         BankAccount a666 = BankAccount.builder().accountNumber("a666").amount(400.0).build();
@@ -33,6 +35,16 @@ public class BankServiceTest {
         assertThat("testing floating point silliness", a666.getAmount(), is(298.34));
     }
 
+
+    /**
+     * Testing bad inputs.
+     *
+     * <ul>
+     *     <li>null account</li>
+     *     <li>negative withdrawl amounts</li>
+     *     <li>insufficent funds</li>
+     * </ul>
+     */
     @Test
     public void testWithdrawInvalidInput() {
         try {
@@ -61,6 +73,10 @@ public class BankServiceTest {
         }
     }
 
+    /**
+     * Tests common deposit scenarios, including a 0 deposit.
+     * @throws Exception
+     */
     @Test
     public void testDepositValidInputs() throws Exception {
         BankAccount account = BankAccount.builder().accountNumber("999").build();
@@ -77,6 +93,13 @@ public class BankServiceTest {
         assertThat("should have 1666.0", accountWithBallance.getAmount(), is(1666.0));
     }
 
+    /**
+     * Test bad deposit scenarios
+     * <ul>
+     *     <li>null accounts</li>
+     *     <li>negative deposits</li>
+     * </ul>
+     */
     @Test
     public void testDepositInvalidInputs() {
         try {
@@ -97,6 +120,14 @@ public class BankServiceTest {
         }
     }
 
+    /**
+     * Testing negative transfer scenarios
+     * <ul>
+     *     <li>null accounts</li>
+     *     <li>negative transfer amounts</li>
+     *     <li>insufficient fund transfers</li>
+     * </ul>
+     */
     @Test
     public void testTransferInvalidInputs() {
         BankAccount from = BankAccount.builder().accountNumber("111").amount(333).build();
@@ -134,12 +165,21 @@ public class BankServiceTest {
         }
     }
 
+    /**
+     * Tests valid transfer scenarios, include 0 transfer.
+     * @throws Exception
+     */
     @Test
     public void testTransferValidInput() throws Exception {
         BankAccount from = BankAccount.builder().accountNumber("111").amount(1000).build();
         BankAccount to = BankAccount.builder().accountNumber("222").amount(555).build();
 
         bankService.transfer(from, to, 100.66);
+        assertThat("from account", from.getAmount(), is(899.34));
+        assertThat("to account", to.getAmount(), is(655.66));
+
+
+        bankService.transfer(from, to, 0);
         assertThat("from account", from.getAmount(), is(899.34));
         assertThat("to account", to.getAmount(), is(655.66));
     }
